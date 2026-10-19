@@ -1,0 +1,17 @@
+name: branch
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO lint the code (Task 7)"
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO run pytest unit tests (Task 7)"

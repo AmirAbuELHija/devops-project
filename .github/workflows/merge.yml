@@ -1,0 +1,24 @@
+name: merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  image-push:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO build the image, tag it ${{ github.sha }}, push to Docker Hub (Task 4)"
+
+  deploy:
+    needs: image-push
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO deploy image ${{ github.sha }} to AWS (Task 6)"
+
+  smoke-test:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO call /healthz, then create, read and delete one book (Task 6)"

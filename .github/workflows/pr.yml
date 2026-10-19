@@ -1,0 +1,34 @@
+name: pr
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO lint the code"
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO run pytest unit tests"
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO scan code and dependencies (Task 9)"
+
+  integration-tests:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO run integration tests against PostgreSQL (Task 8)"
+
+  image-build:
+    needs: [lint, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "TODO build the Docker image, without pushing it (Task 4)"
