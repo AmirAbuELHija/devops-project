@@ -23,6 +23,13 @@ variable "github_repo" {
   default     = "AmirAbuELHija/devops-project"
 }
 
+# Newer GitHub tokens put immutable ids in the sub: owner@<owner-id>/repo@<repo-id>.
+# Renaming the account or repo can't then hand its AWS access to someone else.
+variable "github_repo_with_ids" {
+  type    = string
+  default = "AmirAbuELHija@122019097/devops-project@1425898615"
+}
+
 resource "aws_iam_openid_connect_provider" "github" {
   url            = "https://token.actions.githubusercontent.com"
   client_id_list = ["sts.amazonaws.com"]
@@ -46,7 +53,10 @@ data "aws_iam_policy_document" "trust" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:ref:refs/heads/main"]
+      values = [
+        "repo:${var.github_repo}:ref:refs/heads/main",
+        "repo:${var.github_repo_with_ids}:ref:refs/heads/main",
+      ]
     }
   }
 }
