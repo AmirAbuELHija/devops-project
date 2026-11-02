@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 jobs:
   image-push:
     runs-on: ubuntu-latest
@@ -38,20 +42,56 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    outputs:
+      url: ${{ steps.url.outputs.url }}
+    env:
+      IMAGE: ${{ needs.image-push.outputs.image }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: Trade GitHub's ID token for AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Ask AWS who the job is
-        run: aws sts get-caller-identity
+      - name: Connect kubectl
+        run: aws eks update-kubeconfig --name "${{ vars.EKS_CLUSTER }}" --region "${{ vars.AWS_REGION }}"
 
-      - run: echo "TODO deploy ${{ needs.image-push.outputs.image }} to EKS (Task 6)"
+      - name: Apply the manifests with this commit's image
+        run: |
+          sed "s|IMAGE_PLACEHOLDER|$IMAGE|" deploy/deployment.yaml | kubectl apply -f -
+          kubectl apply -f deploy/service.yaml
+
+      - name: Wait for the rollout
+        run: kubectl -n web rollout status deployment/books --timeout=180s
+
+      - name: Find the load balancer's address
+        id: url
+        run: |
+          for i in $(seq 30); do
+            host=$(kubectl -n web get service books -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            [ -n "$host" ] && break
+            sleep 10
+          done
+          [ -n "$host" ] || { echo "No load balancer address after 5 minutes"; exit 1; }
+          echo "url=http://$host" >> "$GITHUB_OUTPUT"
+          echo "App URL: http://$host"
 
   smoke-test:
     needs: deploy
     runs-on: ubuntu-latest
+    env:
+      URL: ${{ needs.deploy.outputs.url }}
     steps:
-      - run: echo "TODO call /healthz, then create, read and delete one book (Task 6)"
+      - name: GET /healthz answers 200
+        run: curl --fail --silent --show-error --retry 30 --retry-delay 10 --retry-all-errors "$URL/healthz"
+
+      - name: POST /books answers 201
+        run: |
+          code=$(curl --silent --output /dev/stderr --write-out '%{http_code}' \
+            -X POST "$URL/books" -H "Content-Type: application/json" \
+            -d '{"title": "Smoke test", "author": "Pipeline"}')
+          echo
+          echo "Status: $code"
+          [ "$code" = "201" ]
