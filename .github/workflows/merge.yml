@@ -35,8 +35,20 @@ jobs:
   deploy:
     needs: image-push
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
-      - run: echo "TODO deploy ${{ needs.image-push.outputs.image }} to AWS (Task 6)"
+      - name: Trade GitHub's ID token for AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Ask AWS who the job is
+        run: aws sts get-caller-identity
+
+      - run: echo "TODO deploy ${{ needs.image-push.outputs.image }} to EKS (Task 6)"
 
   smoke-test:
     needs: deploy
