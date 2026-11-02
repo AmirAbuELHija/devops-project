@@ -28,7 +28,7 @@
 # One round = one "changes requested" review that you answer by pushing again.
 # The app counts by reading its own past reviews on the pull request. It
 # stores nothing of its own.
-rounds: 1
+rounds: 0
 
 
 # merge — WHO presses the merge button. And if it is the app, HOW it merges.
