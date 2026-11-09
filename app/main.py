@@ -1,6 +1,7 @@
 """Reading-list CRUD API (Task 1 of the DevOps project)."""
+
 from datetime import date
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Response, status
 from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr, field_validator
@@ -13,7 +14,7 @@ class BookIn(BaseModel):
 
     title: Annotated[StrictStr, Field(min_length=1, max_length=200)]
     author: Annotated[StrictStr, Field(min_length=1, max_length=100)]
-    year: Optional[StrictInt] = None
+    year: StrictInt | None = None
     read: StrictBool = False
 
     @field_validator("year")

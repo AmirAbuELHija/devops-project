@@ -13,4 +13,6 @@ def client():
 
 @pytest.fixture
 def book(client):
-    return client.post("/books", json={"title": "Dune", "author": "Frank Herbert", "year": 1965}).json()
+    return client.post(
+        "/books", json={"title": "Dune", "author": "Frank Herbert", "year": 1965}
+    ).json()

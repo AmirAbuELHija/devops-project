@@ -2,9 +2,17 @@
 
 
 def test_create_book(client):
-    r = client.post("/books", json={"title": "Dune", "author": "Frank Herbert", "year": 1965})
+    r = client.post(
+        "/books", json={"title": "Dune", "author": "Frank Herbert", "year": 1965}
+    )
     assert r.status_code == 201
-    assert r.json() == {"id": 1, "title": "Dune", "author": "Frank Herbert", "year": 1965, "read": False}
+    assert r.json() == {
+        "id": 1,
+        "title": "Dune",
+        "author": "Frank Herbert",
+        "year": 1965,
+        "read": False,
+    }
     assert r.headers["Location"] == "/books/1"
 
 
@@ -24,10 +32,21 @@ def test_read_book(client, book):
 
 
 def test_replace_book_resets_defaults_and_ignores_id(client):
-    client.post("/books", json={"title": "Dune", "author": "Frank Herbert", "year": 1965, "read": True})
-    r = client.put("/books/1", json={"id": 99, "title": "Dune Messiah", "author": "Frank Herbert"})
+    client.post(
+        "/books",
+        json={"title": "Dune", "author": "Frank Herbert", "year": 1965, "read": True},
+    )
+    r = client.put(
+        "/books/1", json={"id": 99, "title": "Dune Messiah", "author": "Frank Herbert"}
+    )
     assert r.status_code == 200
-    assert r.json() == {"id": 1, "title": "Dune Messiah", "author": "Frank Herbert", "year": None, "read": False}
+    assert r.json() == {
+        "id": 1,
+        "title": "Dune Messiah",
+        "author": "Frank Herbert",
+        "year": None,
+        "read": False,
+    }
     assert client.get("/books/1").json() == r.json()
 
 
