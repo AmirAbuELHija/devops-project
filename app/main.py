@@ -43,7 +43,7 @@ def get_or_404(book_id: int) -> Book:
 
 @app.get("/healthz")
 def healthz():
-    return {"status": "OK"}
+    return {"status": "ok"}
 
 
 @app.post("/books", status_code=status.HTTP_201_CREATED, response_model=Book)
