@@ -1,4 +1,5 @@
 """One test per row of the errors table, and the error body contract."""
+
 from datetime import date
 
 import pytest
@@ -15,16 +16,16 @@ def test_unknown_id_is_404(client, method):
 @pytest.mark.parametrize(
     "body",
     [
-        {"author": "A"},                                         # title missing
-        {"title": "T"},                                          # author missing
-        {"title": "", "author": "A"},                            # title too short
-        {"title": "x" * 201, "author": "A"},                     # title too long
-        {"title": "T", "author": "x" * 101},                     # author too long
-        {"title": 5, "author": "A"},                             # wrong type
-        {"title": "T", "author": "A", "year": "1999"},           # wrong type
-        {"title": "T", "author": "A", "year": -1},               # out of range
+        {"author": "A"},  # title missing
+        {"title": "T"},  # author missing
+        {"title": "", "author": "A"},  # title too short
+        {"title": "x" * 201, "author": "A"},  # title too long
+        {"title": "T", "author": "x" * 101},  # author too long
+        {"title": 5, "author": "A"},  # wrong type
+        {"title": "T", "author": "A", "year": "1999"},  # wrong type
+        {"title": "T", "author": "A", "year": -1},  # out of range
         {"title": "T", "author": "A", "year": date.today().year + 1},
-        {"title": "T", "author": "A", "read": "yes"},            # wrong type
+        {"title": "T", "author": "A", "read": "yes"},  # wrong type
     ],
 )
 def test_invalid_book_is_422(client, body):
@@ -34,7 +35,9 @@ def test_invalid_book_is_422(client, body):
 
 
 def test_non_json_body_is_422(client):
-    r = client.post("/books", content="not json", headers={"Content-Type": "application/json"})
+    r = client.post(
+        "/books", content="not json", headers={"Content-Type": "application/json"}
+    )
     assert r.status_code == 422
     assert list(r.json()) == ["detail"]
 
